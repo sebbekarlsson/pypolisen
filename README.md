@@ -4,6 +4,7 @@
 
 ## Usage
 ### Fetching location suggestions
+> `Client`.`get_suggestions(<str:location_name>)`
 
     from pypolisen.Client import Client
 
@@ -22,6 +23,7 @@
     # ]
 
 ### Fetching items / police notices
+> `Client`.`get_items(<int:location_id>)`
 
     from pypolisen.Client import Client
 
