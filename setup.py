@@ -5,7 +5,8 @@ setup(
     name='pypolisen',
     version='1.1',
     install_requires=[
-        'requests'
+        'requests',
+        'bs4'
     ],
     packages=find_packages(),
     entry_points={
