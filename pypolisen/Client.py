@@ -5,6 +5,7 @@ from pypolisen.utils import tryreturn, set_attr
 from pypolisen.constants import (
     ITEM_PAGE_TEXT_CSS_QUERY,
     GET_ITEMS_QUERY_DEFAULTS,
+    ITEM_META_IGNORE,
     EMPTY_LIST
 )
 
@@ -32,7 +33,7 @@ class Client(object):
     def get_items(self, location_id):
         return tryreturn(
             map(
-                lambda x: set_attr(x, 'text', self.get_item_text(x)),
+                lambda x: set_attr(x, 'meta', self.get_item_extras(x)),
                 json.loads(
                     self.session.post(
                         self.items_route,
@@ -53,10 +54,21 @@ class Client(object):
             'html.parser'
         )
 
-    def get_item_text(self, item):
-        return self.scrape_element_text(
-            self.get_item_document(item),
-            ITEM_PAGE_TEXT_CSS_QUERY
+    def get_item_extras(self, item):
+        document = self.get_item_document(item)
+
+        return dict (
+            text=tryreturn(
+                self.get_item_document(item)
+                .select(ITEM_PAGE_TEXT_CSS_QUERY)[0].text,
+                IndexError,
+                None
+            ),
+            **{
+                meta.get('name'): meta.get('content')
+                for meta in document.select('meta')
+                if meta.get('name') not in ITEM_META_IGNORE
+            }
         )
 
     def scrape_element_text(self, document, selector):

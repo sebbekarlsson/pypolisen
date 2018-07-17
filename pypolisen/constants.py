@@ -1,4 +1,5 @@
 ITEM_PAGE_TEXT_CSS_QUERY = '.editorial-html'
+
 GET_ITEMS_QUERY_DEFAULTS = {
     'ContentId': 7069,
     'PageIndex': 1,
@@ -12,3 +13,13 @@ GET_ITEMS_QUERY_DEFAULTS = {
     'PropertyIds': []
 }
 EMPTY_LIST = []
+
+ITEM_META_IGNORE = [
+    'robots',
+    'google-site-verification',
+    'msapplication-TileColor',
+    'msvalidate.01',
+    'theme-color',
+    'twitter:card',
+    'viewport'
+]

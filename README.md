@@ -44,7 +44,9 @@
     #         'ImageUrl': '...',
     #         'ImageDescription': '...',
     #         'HasTeaserText': False,
-    #         'text': '...'
+    #         'meta': {
+    #             'text': '...'
+    #         }
     #         ...
     #     }
     #     ...

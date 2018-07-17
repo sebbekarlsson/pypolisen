@@ -24,4 +24,5 @@ def test_items():
         assert 'ImageUrl' in item
         assert 'ImageDescription' in item
         assert 'HasTeaserText' in item
-        assert 'text' in item
+        assert 'meta' in item
+        assert 'text' in item['meta']

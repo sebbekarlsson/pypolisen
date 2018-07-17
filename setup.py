@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pypolisen',
-    version='1.1',
+    version='1.1.2',
     install_requires=[
         'requests',
         'bs4'
