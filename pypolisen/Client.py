@@ -1,7 +1,7 @@
 import json
 from requests import Session
 from bs4 import BeautifulSoup
-from pypolisen.utils import tryreturn, set_attr
+from pypolisen.utils import try_this, set_attr
 from pypolisen.constants import (
     ITEM_PAGE_TEXT_CSS_QUERY,
     GET_ITEMS_QUERY_DEFAULTS,
@@ -20,7 +20,7 @@ class Client(object):
         self.session = Session()
 
     def get_suggestions(self, location):
-        return tryreturn(
+        return try_this(
             json.loads(
                 self.session.get(
                     self.location_route + '?query=' + location,
@@ -31,7 +31,7 @@ class Client(object):
         )
 
     def get_items(self, location_id):
-        return tryreturn(
+        return try_this(
             map(
                 lambda x: set_attr(x, 'meta', self.get_item_extras(x)),
                 json.loads(
@@ -58,7 +58,7 @@ class Client(object):
         document = self.get_item_document(item)
 
         return dict(
-            text=tryreturn(
+            text=try_this(
                 self.get_item_document(item)
                 .select(ITEM_PAGE_TEXT_CSS_QUERY)[0].text,
                 IndexError,
@@ -72,7 +72,7 @@ class Client(object):
         )
 
     def scrape_element_text(self, document, selector):
-        return tryreturn(
+        return try_this(
             document.select(selector)[0].text,
             IndexError,
             None

@@ -1,4 +1,4 @@
-def tryreturn(return_success, exception, return_error):
+def try_this(return_success, exception, return_error):
     try:
         return return_success
     except exception:
