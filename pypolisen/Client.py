@@ -1,6 +1,7 @@
 import json
 from requests import Session
 from bs4 import BeautifulSoup
+from pypolisen.utils import tryreturn, set_attr
 
 
 class Client(object):
@@ -13,19 +14,20 @@ class Client(object):
         self.session = Session()
 
     def get_suggestions(self, location):
-        try:
-            return json.loads(
+        return tryreturn(
+            json.loads(
                 self.session.get(
                     self.location_route + '?query=' + location,
                 ).text
-            )
-        except ValueError:
-            return []
+            ),
+            ValueError,
+            []
+        )
 
     def get_items(self, location_id):
-        try:
-            return map(
-                lambda x: self.set_attr(x, 'text', self.scrape_element_text(
+        return tryreturn(
+            map(
+                lambda x: set_attr(x, 'text', self.scrape_element_text(
                     self.base_url + x['Url'], '.editorial-html'
                 )),
                 json.loads(
@@ -46,14 +48,15 @@ class Client(object):
                         }
                     ).text
                 )['List']
-            )
-        except ValueError:
-            return []
-
-    def set_attr(self, item, attr, value):
-        item[attr] = value
-        return item
-
+            ),
+            ValueError,
+            []
+        )
+    
     def scrape_element_text(self, url, selector):
-        return BeautifulSoup(self.session.get(url).text, 'html.parser')\
-            .select(selector)[0].text
+        return tryreturn(
+            BeautifulSoup(self.session.get(url).text, 'html.parser')
+            .select(selector)[0].text,
+            IndexError,
+            None
+        )

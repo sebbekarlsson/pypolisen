@@ -16,6 +16,7 @@ def print_help():
     print('Usage: polisen <method> <args...>')
     print('Available methods: [{}]'.format(', '.join(AVAILABLE_COMMANDS)))
 
+
 def run_items():
     parser.add_argument(
         'location_id',
