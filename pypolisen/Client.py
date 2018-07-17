@@ -47,7 +47,7 @@ class Client(object):
             ValueError,
             EMPTY_LIST
         )
-    
+
     def get_item_document(self, item):
         return BeautifulSoup(
             self.session.get(self.base_url + item['Url']).text,
@@ -57,7 +57,7 @@ class Client(object):
     def get_item_extras(self, item):
         document = self.get_item_document(item)
 
-        return dict (
+        return dict(
             text=tryreturn(
                 self.get_item_document(item)
                 .select(ITEM_PAGE_TEXT_CSS_QUERY)[0].text,
