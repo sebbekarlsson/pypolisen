@@ -48,3 +48,12 @@
     #     }
     #     ...
     # ]
+
+## Installing
+> To install either clone down the repository and run:
+
+    python setup.py install
+
+> Or using pip:
+
+    pip install pypolisen
