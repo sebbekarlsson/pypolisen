@@ -49,6 +49,22 @@
     #     ...
     # ]
 
+### It can also be used through the command line
+> Use the command `polisen`:
+
+    # arguments:
+    $ polisen <method> <args...>
+
+    # fetching location suggestions
+    # arguments: <location_name>
+    $ polisen suggestions gisla
+
+    ...
+
+    # fetching items / notices
+    # arguments: <location_id>
+    $ polisen items 69
+
 ## Installing
 > To install either clone down the repository and run:
 
