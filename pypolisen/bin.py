@@ -19,19 +19,19 @@ def print_help():
 
 def run_items():
     parser.add_argument(
-        'location_id',
+        '--id',
         metavar='i', type=int, help='location id / city id'
     )
 
     args = parser.parse_args()
 
-    for item in client.get_items(args.location_id):
+    for item in client.get_items(args.id):
         print(json.dumps(item, indent=4, sort_keys=True))
 
 
 def run_suggestions():
     parser.add_argument(
-        'location',
+        '--location',
         metavar='l', type=str, help='location name / city name'
     )
 

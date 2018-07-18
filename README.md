@@ -59,14 +59,14 @@
     $ polisen <method> <args...>
 
     # fetching location suggestions
-    # arguments: <location_name>
-    $ polisen suggestions gisla
+    # location: name of location
+    $ polisen suggestions --location=gisla
 
     ...
 
     # fetching items / notices
-    # arguments: <location_id>
-    $ polisen items 69
+    # id: id of location
+    $ polisen items --id=69
 
 ## Installing
 > To install either clone down the repository and run:
