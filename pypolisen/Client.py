@@ -44,7 +44,7 @@ class Client(object):
                     ).text
                 )['List']
             ),
-            ValueError,
+            (ValueError, KeyError),
             EMPTY_LIST
         )
 
