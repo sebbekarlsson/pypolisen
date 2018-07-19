@@ -12,6 +12,7 @@ GET_ITEMS_QUERY_DEFAULTS = {
     'ListItemType': 1,
     'PropertyIds': []
 }
+
 EMPTY_LIST = []
 
 ITEM_META_IGNORE = [

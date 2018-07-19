@@ -3,9 +3,9 @@ import sys
 import json
 from pypolisen.Client import Client
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('m')
-
 
 client = Client()
 
@@ -17,6 +17,10 @@ def print_help():
     print('Available methods: [{}]'.format(', '.join(AVAILABLE_COMMANDS)))
 
 
+def print_pretty(stdout):
+    print(json.dumps(stdout, indent=4, sort_keys=True))
+
+
 def run_items():
     parser.add_argument(
         '--id',
@@ -26,7 +30,7 @@ def run_items():
     args = parser.parse_args()
 
     for item in client.get_items(args.id):
-        print(json.dumps(item, indent=4, sort_keys=True))
+        print_pretty(item)
 
 
 def run_suggestions():
@@ -38,7 +42,7 @@ def run_suggestions():
     args = parser.parse_args()
 
     for item in client.get_suggestions(args.location):
-        print(json.dumps(item, indent=4, sort_keys=True))
+        print_pretty(item)
 
 
 def run():
@@ -46,8 +50,6 @@ def run():
 
     if command not in AVAILABLE_COMMANDS:
         return print_help()
-
-    items = []
 
     if command == 'suggestions':
         run_suggestions()
