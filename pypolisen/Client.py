@@ -1,7 +1,7 @@
 import json
 from requests import Session
 from bs4 import BeautifulSoup
-from pypolisen.utils import try_this, set_attr
+from pypolisen.utils import try_except, set_attr
 from pypolisen.constants import (
     ITEM_PAGE_TEXT_CSS_QUERY,
     GET_ITEMS_QUERY_DEFAULTS,
@@ -19,33 +19,41 @@ class Client(object):
         self.items_route = self.api_route + '/items'
         self.session = Session()
 
+    def _get_suggestions(self, args):
+        return json.loads(
+            self.session.get(
+                self.location_route + '?query=' + args.location,
+            ).text
+        )
+
     def get_suggestions(self, location):
-        return try_this(
-            json.loads(
-                self.session.get(
-                    self.location_route + '?query=' + location,
-                ).text
-            ),
+        return try_except(
+            self._get_suggestions,
             ValueError,
-            EMPTY_LIST
+            lambda x: EMPTY_LIST,
+            args=dict(location=location)
+        )
+
+    def _get_items(self, args):
+        return map(
+            lambda x: set_attr(x, 'meta', self.get_item_extras(x)),
+            json.loads(
+                self.session.post(
+                    self.items_route,
+                    data=dict(
+                        SelectedLocationId=args.location_id,
+                        **GET_ITEMS_QUERY_DEFAULTS
+                    )
+                ).text
+            )['List']
         )
 
     def get_items(self, location_id):
-        return try_this(
-            map(
-                lambda x: set_attr(x, 'meta', self.get_item_extras(x)),
-                json.loads(
-                    self.session.post(
-                        self.items_route,
-                        data=dict(
-                            SelectedLocationId=location_id,
-                            **GET_ITEMS_QUERY_DEFAULTS
-                        )
-                    ).text
-                )['List']
-            ),
+        return try_except(
+            self._get_items,
             (ValueError, KeyError),
-            EMPTY_LIST
+            lambda x: EMPTY_LIST,
+            args=dict(location_id=location_id)
         )
 
     def get_item_document(self, item):
@@ -56,11 +64,10 @@ class Client(object):
 
     def get_document_extras(self, document):
         return dict(
-            text=try_this(
-                document
-                .select(ITEM_PAGE_TEXT_CSS_QUERY)[0].text,
+            text=try_except(
+                lambda x: document.select(ITEM_PAGE_TEXT_CSS_QUERY)[0].text,
                 IndexError,
-                None
+                lambda x: None
             ),
             **{
                 meta.get('name'): meta.get('content')
@@ -73,8 +80,8 @@ class Client(object):
         return self.get_document_extras(self.get_item_document(item))
 
     def scrape_element_text(self, document, selector):
-        return try_this(
-            document.select(selector)[0].text,
+        return try_except(
+            lambda x: document.select(selector)[0].text,
             IndexError,
-            None
+            lambda x: None
         )
