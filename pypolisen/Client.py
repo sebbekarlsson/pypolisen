@@ -1,7 +1,7 @@
 import json
 from requests import Session
 from bs4 import BeautifulSoup
-from pypolisen.utils import try_this, set_attr, Scope
+from pypolisen.utils import try_this, set_attr
 from pypolisen.constants import (
     ITEM_PAGE_TEXT_CSS_QUERY,
     GET_ITEMS_QUERY_DEFAULTS,
@@ -54,30 +54,23 @@ class Client(object):
             'html.parser'
         )
 
-    def _scope_item_extras(self, get):
+    def get_document_extras(self, document):
         return dict(
             text=try_this(
-                get('document')
-                .select(get('ITEM_PAGE_TEXT_CSS_QUERY'))[0].text,
+                document
+                .select(ITEM_PAGE_TEXT_CSS_QUERY)[0].text,
                 IndexError,
                 None
             ),
             **{
                 meta.get('name'): meta.get('content')
-                for meta in get('document').select('meta')
-                if meta.get('name') not in get('ITEM_META_IGNORE')
+                for meta in document.select('meta')
+                if meta.get('name') not in ITEM_META_IGNORE
             }
         )
 
     def get_item_extras(self, item):
-        return Scope(
-            dict(
-                document=self.get_item_document(item),
-                ITEM_PAGE_TEXT_CSS_QUERY=ITEM_PAGE_TEXT_CSS_QUERY,
-                ITEM_META_IGNORE=ITEM_META_IGNORE
-            ),
-            self._scope_item_extras
-        ).execute()
+        return self.get_document_extras(self.get_item_document(item))
 
     def scrape_element_text(self, document, selector):
         return try_this(
