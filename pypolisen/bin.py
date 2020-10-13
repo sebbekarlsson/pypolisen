@@ -8,12 +8,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('m')
 
 client = Client()
-
-AVAILABLE_COMMANDS = ['suggestions', 'items']
+AVAILABLE_COMMANDS = ['events']
 
 
 def print_help():
-    print('Usage: polisen <method> <args...>')
+    print('Usage: polisen <method> [--location city] [--type eventtype] [--date YYYY-MM-DD|YYYY-MM|YYYY]')
     print('Available methods: [{}]'.format(', '.join(AVAILABLE_COMMANDS)))
 
 
@@ -21,27 +20,34 @@ def print_pretty(stdout):
     print(json.dumps(stdout, indent=4, sort_keys=True))
 
 
-def run_items():
-    parser.add_argument(
-        '--id',
-        metavar='i', type=int, help='location id / city id'
-    )
-
-    args = parser.parse_args()
-
-    for item in client.get_items(args.id):
-        print_pretty(item)
-
-
-def run_suggestions():
+def run_events():
     parser.add_argument(
         '--location',
         metavar='l', type=str, help='location name / city name'
     )
+    parser.add_argument(
+        '--type',
+        metavar='t', type=str, help='event type'
+    )
+    parser.add_argument(
+        '--date',
+        metavar='d', type=str, help='date'
+    )
 
     args = parser.parse_args()
+    adate = ""
+    eventlocation = []
+    eventtype = []
+    if args.date:
+        adate = args.date
+    if args.location:
+        eventlocation = [args.location]
+    if args.type:
+        eventtype = [args.type]
 
-    for item in client.get_suggestions(args.location):
+    for item in client.get_events(datetime=adate,
+                                  eventlocation=eventlocation,
+                                  eventtype=eventtype):
         print_pretty(item)
 
 
@@ -51,7 +57,9 @@ def run():
     if command not in AVAILABLE_COMMANDS:
         return print_help()
 
-    if command == 'suggestions':
-        run_suggestions()
-    elif command == 'items':
-        run_items()
+    if command == 'events':
+        run_events()
+
+
+if __name__ == "__main__":
+    run()

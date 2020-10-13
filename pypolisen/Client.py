@@ -1,87 +1,93 @@
 import json
-from requests import Session
-from bs4 import BeautifulSoup
-from pypolisen.utils import try_except, set_attr
-from pypolisen.constants import (
-    ITEM_PAGE_TEXT_CSS_QUERY,
-    GET_ITEMS_QUERY_DEFAULTS,
-    ITEM_META_IGNORE,
-    EMPTY_LIST
-)
+import requests
 
 
 class Client(object):
 
+    base_url = None
+    events = None
+
     def __init__(self):
-        self.base_url = 'https://polisen.se'
-        self.api_route = self.base_url + '/api/listingservice'
-        self.location_route = self.api_route + '/locationsuggestions'
-        self.items_route = self.api_route + '/items'
-        self.session = Session()
+        self.base_url = 'https://polisen.se/api/events'
 
-    def _get_suggestions(self, args):
-        return json.loads(
-            self.session.get(
-                self.location_route + '?query=' + args.location,
-            ).text
-        )
+    def download_json_file(self,
+                           datetime: str = "",
+                           eventlocation: list = [],
+                           eventtype: list = []):
 
-    def get_suggestions(self, location):
-        return try_except(
-            self._get_suggestions,
-            ValueError,
-            lambda x: EMPTY_LIST,
-            args=dict(location=location)
-        )
+        url = self.base_url
 
-    def _get_items(self, args):
-        return map(
-            lambda x: set_attr(x, 'meta', self.get_item_extras(x)),
-            json.loads(
-                self.session.post(
-                    self.items_route,
-                    data=dict(
-                        SelectedLocationId=args.location_id,
-                        **GET_ITEMS_QUERY_DEFAULTS
-                    )
-                ).text
-            )['List']
-        )
+        if len(eventlocation) > 0:
+            _location = ""
+            for _l in eventlocation:
+                _location += _l + ";"
+            eventlocation = _location
 
-    def get_items(self, location_id):
-        return try_except(
-            self._get_items,
-            (ValueError, KeyError),
-            lambda x: EMPTY_LIST,
-            args=dict(location_id=location_id)
-        )
+        if len(eventtype) > 0:
+            _types = ""
+            for _t in eventtype:
+                _types += _t + ";"
+            eventtype = _types
 
-    def get_item_document(self, item):
-        return BeautifulSoup(
-            self.session.get(self.base_url + item['Url']).text,
-            'html.parser'
-        )
+        if datetime:
+            url += "?DateTime={}".format(datetime)
+            if eventlocation:
+                url += "&locationname={}".format(eventlocation)
+            if eventtype:
+                url += "&type={}".format(eventtype)
+        elif len(eventlocation) > 0:
+            url += "?locationname={}".format(eventlocation)
+            if eventtype:
+                url += "&type={}".format(eventtype)
+        elif len(eventtype) > 0:
+            url += "?type={}".format(eventtype)
 
-    def get_document_extras(self, document):
-        return dict(
-            text=try_except(
-                lambda x: document.select(ITEM_PAGE_TEXT_CSS_QUERY)[0].text,
-                IndexError,
-                lambda x: None
-            ),
-            **{
-                meta.get('name'): meta.get('content')
-                for meta in document.select('meta')
-                if meta.get('name') not in ITEM_META_IGNORE
-            }
-        )
+        jsonfile = None
+        try:
+            jsonfile = requests.get(url)
+        except requests.exceptions.InvalidSchema:
+            return False
+        except requests.exceptions.ConnectionError:
+            return False
 
-    def get_item_extras(self, item):
-        return self.get_document_extras(self.get_item_document(item))
+        # If we didn't get any content or we didn't get HTTP
+        # code 200 (OK) we must give up
+        if (jsonfile is None) or (jsonfile.status_code != 200):
+            return False
 
-    def scrape_element_text(self, document, selector):
-        return try_except(
-            lambda x: document.select(selector)[0].text,
-            IndexError,
-            lambda x: None
-        )
+        # Load the JSON file
+        try:
+            self.events = json.loads(jsonfile.text)
+        except TypeError:
+            return False
+        except json.decoder.JSONDecodeError:
+            return False
+
+    def load_json_file(self, filename: str):
+        with open(filename) as jsonfile:
+            self.events = json.load(jsonfile)
+
+    def get_events(self,
+                   datetime: str = "",
+                   eventlocation: list = [],
+                   eventtype: list = []) -> list:
+
+        self.download_json_file(datetime=datetime,
+                                eventlocation=eventlocation,
+                                eventtype=eventtype)
+
+        events = []
+        for event in self.events:
+            if event['id'] is not None:
+                ev = {
+                    'id': event['id'],
+                    'datetime': event['datetime'],
+                    'name': event['name'],
+                    'summary': event['summary'],
+                    'url': event['url'],
+                    'type': event['type'],
+                    'location_name': event['location']['name'],
+                    'location_gps': event['location']['gps']
+                }
+                events.append(ev)
+        return events
