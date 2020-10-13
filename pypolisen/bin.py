@@ -35,10 +35,19 @@ def run_events():
     )
 
     args = parser.parse_args()
+    adate = ""
+    eventlocation = []
+    eventtype = []
+    if args.date:
+        adate = args.date
+    if args.location:
+        eventlocation = [args.location]
+    if args.type:
+        eventtype = [args.type]
 
-    for item in client.get_events(datetime=args.date,
-                                  eventlocation=[args.location],
-                                  eventtype=[args.type]):
+    for item in client.get_events(datetime=adate,
+                                  eventlocation=eventlocation,
+                                  eventtype=eventtype):
         print_pretty(item)
 
 

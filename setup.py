@@ -25,7 +25,7 @@ setup(
     python_requires=">=3.5",
     entry_points={
         'console_scripts': [
-            'polisen = bin:run'
+            'polisen = pypolisen.bin:run'
         ]
     }
 )

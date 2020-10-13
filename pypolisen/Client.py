@@ -17,13 +17,13 @@ class Client(object):
 
         url = self.base_url
 
-        if eventlocation:
+        if len(eventlocation) > 0:
             _location = ""
             for _l in eventlocation:
                 _location += _l + ";"
             eventlocation = _location
 
-        if eventtype:
+        if len(eventtype) > 0:
             _types = ""
             for _t in eventtype:
                 _types += _t + ";"
@@ -35,14 +35,13 @@ class Client(object):
                 url += "&locationname={}".format(eventlocation)
             if eventtype:
                 url += "&type={}".format(eventtype)
-        elif eventlocation:
+        elif len(eventlocation) > 0:
             url += "?locationname={}".format(eventlocation)
             if eventtype:
                 url += "&type={}".format(eventtype)
-        elif eventtype:
+        elif len(eventtype) > 0:
             url += "?type={}".format(eventtype)
 
-        print(url)
         jsonfile = None
         try:
             jsonfile = requests.get(url)
